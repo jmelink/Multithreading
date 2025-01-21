@@ -14,7 +14,7 @@ public class ConnectionPool {
 	
 	private ConnectionPool() {
 		try {
-			setConnections(new ArrayBlockingQueue<Connection>(getMaxConnections()));
+			this.connections = new ArrayBlockingQueue<Connection>(getMaxConnections());
 			for (int i = 0; i < getMaxConnections(); i++) {
 				connections.put(new Connection(this));
 			}
@@ -23,14 +23,6 @@ public class ConnectionPool {
 		}	
 	}
 
-	public ArrayBlockingQueue<Connection> getConnections() {
-		return connections;
-	}
-
-	public void setConnections(ArrayBlockingQueue<Connection> connections) {
-		this.connections = connections;
-	}
-	
 	public static ConnectionPool getConnectionPool() {
 		return INSTANCE;
 	}
@@ -41,7 +33,7 @@ public class ConnectionPool {
 	
 	public Connection getConnection() {
 		try {
-			return getConnections().take();
+			return connections.take();
 		} catch (InterruptedException e) {
 			LOGGER.error("Error when getting connection for  " + Thread.currentThread().getName() + "'s connection.", e.getMessage());
 			throw new RuntimeException(e);
@@ -50,7 +42,7 @@ public class ConnectionPool {
 	
 	public void releaseConnection(Connection connection) {
 		try {
-			getConnections().put(connection);
+			connections.put(connection);
 		} catch (InterruptedException e) {
 			LOGGER.error("Error when releasing  " + Thread.currentThread().getName() + "'s connection.", e.getMessage());
 		}
